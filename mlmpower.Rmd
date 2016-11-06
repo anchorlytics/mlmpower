@@ -14,14 +14,26 @@ library(dplyr)
 library(rstan)
 ```
 
-## R Markdown
+This is very much inspired by Andrew Marder's [powerstan](https://github.com/amarder/powerstan/).
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Generative Model
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r model}
+model.code <- "
+parameters {
+  real mu;
+  real sigma;
+}
 
-```{r cars}
-summary(cars)
+model {}
+
+generated quantities {
+  real y;
+  y <- normal_rng(mu, sigma);
+}
+"
+
+model <- stan_model(model_code = model_code)
 ```
 
 ## Including Plots
