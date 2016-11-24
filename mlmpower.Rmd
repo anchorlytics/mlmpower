@@ -35,30 +35,15 @@ powerSim(model1, nsim=20)
 powerSim(model2, nsim=20)
 ```
 
-```{r simr}
-n1 = 10     # participants per site
+```{r params}
+n1 = 10     # avg participants per site
 n2 = 30     # sites in study
-expand.grid()
+p = 10      # num predictors
 ```
 
-This is very much inspired by Andrew Marder's [powerstan](https://github.com/amarder/powerstan/).
+```{r gen-model}
+n1.vec = rpois(n2, n1)    # num participants for each site
 
-## Generative Model
+expand.grid()
 
-```{r model}
-model.code <- "
-parameters {
-  real mu;
-  real sigma;
-}
-
-model {}
-
-generated quantities {
-  real y;
-  y <- normal_rng(mu, sigma);
-}
-"
-
-model <- stan_model(model_code = model_code)
 ```

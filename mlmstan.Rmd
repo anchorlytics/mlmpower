@@ -1,0 +1,38 @@
+---
+title: "Multilevel Power Analysis Using Stan"
+author: "Sean Ho / Anchorlytics"
+date: "November 24, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The following is very much inspired by Andrew Marder's [powerstan](https://github.com/amarder/powerstan/).
+But adapted for multilevel model.
+
+```{r libraries, warning=FALSE}
+library(dplyr)
+library(rstan)
+```
+
+## Generative Model
+
+```{r model}
+model.code <- "
+parameters {
+  real mu;
+  real sigma;
+}
+
+model {}
+
+generated quantities {
+  real y;
+  y <- normal_rng(mu, sigma);
+}
+"
+
+model <- stan_model(model_code = model_code)
+```
