@@ -11,7 +11,34 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r libraries, warning=FALSE}
 library(dplyr)
+library(simr)
 library(rstan)
+```
+
+## Using Simr
+
+### Simr's own vignette
+```{r simr-vignette}
+x <- rep(1:10)
+g <- c('a', 'b', 'c')
+X <- expand.grid(x=x, g=g)
+
+b <- c(2, -0.1) # fixed intercept and slope
+V1 <- 0.5 # random intercept variance
+V2 <- matrix(c(0.5,0.05,0.05,0.1), 2) # random intercept and slope variance-covariance matrix
+s <- 1 # residual variance
+
+model1 <- makeLmer(y ~ x + (1|g), fixef=b, VarCorr=V1, sigma=s, data=X)
+model2 <- makeGlmer(z ~ x + (x|g), family="poisson", fixef=b, VarCorr=V2, data=X)
+
+powerSim(model1, nsim=20)
+powerSim(model2, nsim=20)
+```
+
+```{r simr}
+n1 = 10     # participants per site
+n2 = 30     # sites in study
+expand.grid()
 ```
 
 This is very much inspired by Andrew Marder's [powerstan](https://github.com/amarder/powerstan/).
@@ -35,13 +62,3 @@ generated quantities {
 
 model <- stan_model(model_code = model_code)
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
