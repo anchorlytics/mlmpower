@@ -9,15 +9,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The following is very much inspired by Andrew Marder's [powerstan](https://github.com/amarder/powerstan/).
-But adapted for multilevel model.
+I'm trying to adapt Andrew Marder's [powerstan](https://github.com/amarder/powerstan/) vignette
+for a multilevel model.
 
 ```{r libraries, warning=FALSE}
 library(tidyverse)
 library(rstan)
 ```
 
-## Generative Model
+## PowerStan vignette
 
 ```{r model}
 model.code <- "
@@ -35,4 +35,38 @@ generated quantities {
 "
 
 model <- stan_model(model_code = model_code)
+```
+
+```{r}
+data_simulator <- function(d, n) {
+    simulate_data(
+        model = model,
+        parameters = list(mu = d, sigma = 1),
+        n = n
+    )
+}
+
+reject <- function(data, sig.level) {
+    n <- nrow(data)
+    zscore <- mean(data$y) * sqrt(n)
+    low <- qnorm(sig.level / 2, mean = 0, sd = 1)
+    high <- qnorm(1 - (sig.level / 2), mean = 0, sd = 1)
+    return( (zscore < low) | (high < zscore) )
+}
+
+power1 <- function(d, n, sig.level) {
+    calculate_power(
+        function() data_simulator(d = d, n = n),
+        function(data) reject(data = data, sig.level = sig.level)
+    )
+}
+```
+
+```{r}
+grid <- expand.grid(d = 0.5, n = (1:20) * 5, sig.level = 0.05)
+
+grid <- grid %>%
+    rowwise() %>%
+    mutate(simulation = power1(d = d, n = n, sig.level = sig.level)) %>%
+    ungroup()
 ```
