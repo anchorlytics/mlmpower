@@ -13,7 +13,7 @@ The following is very much inspired by Andrew Marder's [powerstan](https://githu
 But adapted for multilevel model.
 
 ```{r libraries, warning=FALSE}
-library(dplyr)
+library(tidyverse)
 library(rstan)
 ```
 
