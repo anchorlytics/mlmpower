@@ -10,9 +10,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r libraries, warning=FALSE}
-library(dplyr)
+library(tidyverse)
 library(simr)
-library(rstan)
+library(mvtnorm)
 ```
 
 ## Using Simr
@@ -36,14 +36,40 @@ powerSim(model2, nsim=20)
 ```
 
 ```{r params}
-n1 = 10     # avg participants per site
-n2 = 30     # sites in study
-p = 10      # num predictors
+n1 <- 20     # avg participants per site
+n2 <- 30     # sites in study
+nx <- 3     # num predictors
 ```
 
 ```{r gen-model}
-n1.vec = rpois(n2, n1)    # num participants for each site
+n1.vec <- rpois(n2, n1)    # num participants for each site
+ntot <- sum(n1.vec)
 
-expand.grid()
+# Site names
+mk_sitename <- function(i) rep(sprintf("site%02d", i), n1.vec[i])
+sites <- as.factor(do.call(c,lapply(1:n2, mk_sitename)))
 
+# Predictors
+x.mu <- rep.int(0, nx)
+x.vcov <- rWishart(1, nx, diag(1, nx))[,,1]
+
+x <- as_tibble(rmvnorm(ntot, x.mu, x.vcov))
+names(x) <- sprintf("x%d", 1:nx)
+
+data <- x %>% mutate(site=sites)
+
+# Random-effects model: intcp, slope for each pred
+l2.vcov <- rWishart(1, nx+1, diag(1, nx+1))[,,1]
+
+# Fixed-effects: overall intcp, slope for each pred
+l2.mu <- c(3, rep(0.5, nx/2), rep(-0.5, ceiling(nx/2)))
+
+```
+
+```{r simr}
+# Simr
+simr_mod <- makeGlmer(y ~ x1+x2+x3 + (x1+x2+x3|site),
+                      family="poisson", fixef=l2.mu, VarCorr=l2.vcov, data=data)
+simr_mod
+powerSim(simr_mod, nsim=20)
 ```
