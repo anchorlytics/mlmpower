@@ -70,3 +70,12 @@ grid <- grid %>%
     mutate(simulation = power1(d = d, n = n, sig.level = sig.level)) %>%
     ungroup()
 ```
+
+```{r plot}
+ggplot(grid) +
+    geom_line(aes(x = n, y = simulation)) +
+    xlab("Sample Size") +
+    ylab("Power") +
+    ggtitle("Simulated Power Estimates") +
+    theme_bw()
+```
